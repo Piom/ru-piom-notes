@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -20,7 +21,7 @@ import java.util.Arrays;
  * Created by Alexandr Korkin on 3/5/2016.
  */
 
-@EnableAutoConfiguration
+@SpringBootApplication
 @EnableJpaRepositories(basePackageClasses = AccountRepository.class)
 @EntityScan(basePackageClasses = Note.class)
 public class Application {

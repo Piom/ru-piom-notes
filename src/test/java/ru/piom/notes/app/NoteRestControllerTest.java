@@ -29,8 +29,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -59,7 +58,7 @@ public class NoteRestControllerTest {
     private List<Note> noteList = new ArrayList<>();
 
     @Autowired
-    private NoteRepository bookmarkRepository;
+    private NoteRepository noteRepository;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -74,19 +73,19 @@ public class NoteRestControllerTest {
                 hmc -> hmc instanceof MappingJackson2HttpMessageConverter).findAny().get();
 
         Assert.assertNotNull("the JSON message converter must not be null",
-                this.mappingJackson2HttpMessageConverter);
+                mappingJackson2HttpMessageConverter);
     }
 
     @Before
     public void setup() throws Exception {
         mockMvc = webAppContextSetup(webApplicationContext).build();
 
-        bookmarkRepository.deleteAllInBatch();
+        noteRepository.deleteAllInBatch();
         accountRepository.deleteAllInBatch();
 
         account = accountRepository.save(new Account(userName, "password"));
-        noteList.add(bookmarkRepository.save(new Note(account, "Note content by " + userName)));
-        noteList.add(bookmarkRepository.save(new Note(account, "Note content by " + userName)));
+        noteList.add(noteRepository.save(new Note(account, "Note content by " + userName)));
+        noteList.add(noteRepository.save(new Note(account, "Note content by " + userName)));
     }
 
     @Test
@@ -119,17 +118,35 @@ public class NoteRestControllerTest {
 
     @Test
     public void createNote() throws Exception {
-        String bookmarkJson = json(new Note(
-                this.account, "Note"));
-        this.mockMvc.perform(post("/" + userName + "/notes")
+        String noteJson = json(new Note(
+                account, "Note"));
+        mockMvc.perform(post("/" + userName + "/notes")
                 .contentType(contentType)
-                .content(bookmarkJson))
+                .content(noteJson))
                 .andExpect(status().isCreated());
     }
 
     @Test
+    public void updateNote() throws Exception {
+        String noteJson = json(new Note(
+                account, "New Note"));
+        mockMvc.perform(put("/" + userName + "/notes/" + noteList.get(0).getId())
+                .contentType(contentType)
+                .content(noteJson))
+                .andExpect(status().isNoContent());
+
+    }
+
+    @Test
+    public void removeNote() throws Exception {
+        mockMvc.perform(delete("/" + userName + "/notes/" + noteList.get(0).getId()))
+                .andExpect(status().isNoContent());
+
+    }
+
+    @Test
     public void readHistory() throws Exception {
-        mockMvc.perform(get("/" + userName + "/notes" + noteList.get(0).getId() + "/changes"))
+        mockMvc.perform(get("/" + userName + "/notes/" + noteList.get(0).getId() + "/changes"))
                 .andExpect(status().isOk());
     }
 

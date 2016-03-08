@@ -10,9 +10,6 @@ buildscript {
         classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:1.4.11"
     }
 }
-/*plugins {
-    id "com.gorylenko.gradle-git-properties" version "1.4.11"
-}*/
 
 apply plugin: 'java'
 apply plugin: 'idea'
