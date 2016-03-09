@@ -1,13 +1,13 @@
 # ru-piom-notes
 Rest Documentation
 
-**Show all user notes**
+**Show all account notes**
 ----
-  Returns json data about a single note by user id.
+  Returns json data about a single note by account id.
 
 * **URL**
 
-  /:username/notes
+  /:accountname/notes
 
 * **Method:**
 
@@ -17,7 +17,7 @@ Rest Documentation
 
    **Required:**
 
-   `username=[string]`
+   `accountname=[string]`
 
 * **Data Params**
 
@@ -39,7 +39,7 @@ Rest Documentation
 
   ```javascript
     $.ajax({
-      url: "/user/notes",
+      url: "/account/notes",
       dataType: "json",
       type : "GET",
       success : function(r) {

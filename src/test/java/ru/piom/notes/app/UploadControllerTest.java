@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.http.MockHttpOutputMessage;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -42,7 +43,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @WebAppConfiguration
 @EnableJpaRepositories(basePackageClasses = NoteRepository.class)
 @EntityScan(basePackageClasses = Note.class)
-public class NoteRestControllerTest {
+public class UploadControllerTest {
     private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
             MediaType.APPLICATION_JSON.getSubtype(),
             Charset.forName("utf8"));
@@ -85,75 +86,18 @@ public class NoteRestControllerTest {
 
         account = accountRepository.save(new Account(userName, "password"));
         noteList.add(noteRepository.save(new Note(account, "Note content by " + userName)));
-        noteList.add(noteRepository.save(new Note(account, "Note content by " + userName)));
     }
 
     @Test
-    public void userNotFound() throws Exception {
-        mockMvc.perform(post("/george/notes/")
-                .content(json(new Note()))
-                .contentType(contentType))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void readSingleNote() throws Exception {
-        mockMvc.perform(get("/" + userName + "/notes/"
-                + noteList.get(0).getId()))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.id", is(noteList.get(0).getId().intValue())))
-                .andExpect(jsonPath("$.content", is("Note content by testUser")));
-    }
-
-    @Test
-    public void readNotes() throws Exception {
-        mockMvc.perform(get("/" + userName + "/notes"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id", is(noteList.get(0).getId().intValue())))
-                .andExpect(jsonPath("$[0].content", is("Note content by testUser")));
-    }
-
-    @Test
-    public void createNote() throws Exception {
-        String noteJson = json(new Note(
-                account, "Note"));
-        mockMvc.perform(post("/" + userName + "/notes")
-                .contentType(contentType)
-                .content(noteJson))
-                .andExpect(status().isCreated());
-    }
-
-    @Test
-    public void updateNote() throws Exception {
-        String noteJson = json(new Note(
-                account, "New Note"));
-        mockMvc.perform(put("/" + userName + "/notes/" + noteList.get(0).getId())
-                .contentType(contentType)
-                .content(noteJson))
+    public void uploadFile() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("file", "original.filename", MediaType.TEXT_PLAIN.getType(), "data" .getBytes());
+        mockMvc.perform(fileUpload("/" + userName + "/notes/1/upload ")
+                .file(file))
                 .andExpect(status().isNoContent());
-
     }
 
     @Test
-    public void removeNote() throws Exception {
-        mockMvc.perform(delete("/" + userName + "/notes/" + noteList.get(0).getId()))
-                .andExpect(status().isNoContent());
-
-    }
-
-    @Test
-    public void readHistory() throws Exception {
-        mockMvc.perform(get("/" + userName + "/notes/" + noteList.get(0).getId() + "/changes"))
-                .andExpect(status().isOk());
-    }
-
-    protected String json(Object o) throws IOException {
-        MockHttpOutputMessage mockHttpOutputMessage = new MockHttpOutputMessage();
-        mappingJackson2HttpMessageConverter.write(
-                o, MediaType.APPLICATION_JSON, mockHttpOutputMessage);
-        return mockHttpOutputMessage.getBodyAsString();
+    public void downloadFile() throws Exception {
+        mockMvc.perform(get("/" + userName + "/notes/1/upload/1")).andExpect(status().isAccepted());
     }
 }

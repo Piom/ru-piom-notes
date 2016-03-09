@@ -9,7 +9,9 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import ru.piom.notes.config.ServiceConfig;
 import ru.piom.notes.entities.Account;
 import ru.piom.notes.entities.Note;
 import ru.piom.notes.repository.AccountRepository;
@@ -24,6 +26,7 @@ import java.util.Arrays;
 @SpringBootApplication
 @EnableJpaRepositories(basePackageClasses = AccountRepository.class)
 @EntityScan(basePackageClasses = Note.class)
+@ComponentScan(basePackageClasses = ServiceConfig.class)
 public class Application {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 

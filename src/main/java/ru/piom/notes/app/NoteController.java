@@ -6,7 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import ru.piom.notes.StorageService;
 import ru.piom.notes.entities.Note;
 import ru.piom.notes.repository.AccountRepository;
 import ru.piom.notes.repository.NoteRepository;
@@ -18,7 +21,7 @@ import java.util.Collection;
  */
 @RestController
 @RequestMapping("/{userId}/notes")
-class NoteRestController {
+class NoteController {
 
     @Autowired
     private NoteRepository noteRepository;
@@ -55,6 +58,7 @@ class NoteRestController {
         note.content = input.getContent();
         noteRepository.save(note);
     }
+
 
     @RequestMapping(value = "/{noteId}", method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
