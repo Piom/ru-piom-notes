@@ -2,10 +2,8 @@ package ru.piom.notes.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+import java.util.List;
 
 /**
  * Created by Alexandr Korkin on 3/5/2016.
@@ -21,14 +19,20 @@ public class Note{
     @GeneratedValue
     private Long id;
 
-    public String content;
+    public String title;
+
+    public String body;
+
+    @ManyToMany
+    private List<Tag> tags;
 
     public Note() {
     }
 
-    public Note(Account account, String content) {
+    public Note(Account account, String content, String title) {
+        this.title=title;
         this.account = account;
-        this.content = content;
+        this.body = content;
     }
 
     public Account getAccount() {
@@ -39,7 +43,20 @@ public class Note{
         return id;
     }
 
-    public String getContent() {
-        return content;
+    public String getBody() {
+        return body;
     }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
+
 }

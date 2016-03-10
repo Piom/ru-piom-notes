@@ -23,9 +23,7 @@ import ru.piom.notes.repository.NoteRepository;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -84,8 +82,8 @@ public class NoteRestControllerTest {
         accountRepository.deleteAllInBatch();
 
         account = accountRepository.save(new Account(userName, "password"));
-        noteList.add(noteRepository.save(new Note(account, "Note content by " + userName)));
-        noteList.add(noteRepository.save(new Note(account, "Note content by " + userName)));
+        noteList.add(noteRepository.save(new Note(account, "Note body by " + userName, "Title one")));
+        noteList.add(noteRepository.save(new Note(account, "Note body by " + userName, "Title second")));
     }
 
     @Test
@@ -103,7 +101,7 @@ public class NoteRestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(noteList.get(0).getId().intValue())))
-                .andExpect(jsonPath("$.content", is("Note content by testUser")));
+                .andExpect(jsonPath("$.body", is("Note body by testUser")));
     }
 
     @Test
@@ -113,13 +111,19 @@ public class NoteRestControllerTest {
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", is(noteList.get(0).getId().intValue())))
-                .andExpect(jsonPath("$[0].content", is("Note content by testUser")));
+                .andExpect(jsonPath("$[0].body", is("Note body by testUser")));
     }
 
     @Test
     public void createNote() throws Exception {
-        String noteJson = json(new Note(
-                account, "Note"));
+        Map<String, String> tag = new HashMap<>();
+        tag.put("name", "REST");
+        String tagLocation = this.mockMvc.perform(post("/tags").contentType(contentType).content(
+                                json(tag)))
+                .andExpect(status().isCreated()).andReturn().getResponse()
+                .getHeader("Location");
+        Note note = new Note(account, "Note", "Title");
+        String noteJson = json(note);
         mockMvc.perform(post("/" + userName + "/notes")
                 .contentType(contentType)
                 .content(noteJson))
@@ -129,7 +133,7 @@ public class NoteRestControllerTest {
     @Test
     public void updateNote() throws Exception {
         String noteJson = json(new Note(
-                account, "New Note"));
+                account, "New Note", "New title"));
         mockMvc.perform(put("/" + userName + "/notes/" + noteList.get(0).getId())
                 .contentType(contentType)
                 .content(noteJson))

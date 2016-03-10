@@ -3,13 +3,9 @@ package ru.piom.notes.app;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import ru.piom.notes.StorageService;
 import ru.piom.notes.entities.Note;
 import ru.piom.notes.repository.AccountRepository;
 import ru.piom.notes.repository.NoteRepository;
@@ -35,8 +31,7 @@ class NoteController {
         return accountRepository
                 .findByUsername(userId)
                 .map(account -> {
-                    Note result = noteRepository.save(new Note(account,
-                            input.content));
+                    Note result = noteRepository.save(new Note(account, input.body, input.title));
 
                     HttpHeaders httpHeaders = new HttpHeaders();
                     httpHeaders.setLocation(ServletUriComponentsBuilder
@@ -55,7 +50,7 @@ class NoteController {
         if (note == null) {
             new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
         }
-        note.content = input.getContent();
+        note.body = input.getBody();
         noteRepository.save(note);
     }
 

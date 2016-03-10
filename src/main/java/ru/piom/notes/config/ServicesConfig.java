@@ -9,6 +9,6 @@ import ru.piom.notes.StorageService;
  */
 @Configuration
 @ComponentScan(basePackageClasses = StorageService.class)
-public class ServiceConfig {
+public class ServicesConfig {
 
 }

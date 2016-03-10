@@ -85,7 +85,7 @@ public class UploadControllerTest {
         accountRepository.deleteAllInBatch();
 
         account = accountRepository.save(new Account(userName, "password"));
-        noteList.add(noteRepository.save(new Note(account, "Note content by " + userName)));
+        noteList.add(noteRepository.save(new Note(account, "Note body by " + userName, "Title")));
     }
 
     @Test
