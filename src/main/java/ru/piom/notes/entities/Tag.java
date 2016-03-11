@@ -1,5 +1,7 @@
 package ru.piom.notes.entities;
 
+import org.hibernate.envers.Audited;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -10,23 +12,13 @@ import java.util.List;
  * Created by Alex on 10.03.2016.
  */
 @Entity
-public class Tag {
-    @Id
-    @GeneratedValue
-    private long id;
+@Audited
+public class Tag extends AbstractEntity{
 
     private String name;
 
     @ManyToMany(mappedBy = "tags")
     private List<Note> notes;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;

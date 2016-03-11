@@ -30,14 +30,25 @@ public class TagsController {
 
 
     @RequestMapping(method = RequestMethod.GET)
-    ResponseEntity getAllTags(){
+    ResponseEntity getAllTags() {
         return ResponseEntity.ok().build();
     }
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    void getAllTags(@RequestBody Tag input){
+    void create(@RequestBody Tag input) {
         Tag tag = new Tag();
+        tag.setName(input.getName());
+        tagRepository.save(tag);
+    }
+
+    @RequestMapping(value = "/{tagId}", method = RequestMethod.PUT)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void update(@PathVariable Long tagId, @RequestBody Tag input) {
+        Tag tag = tagRepository.findOne(tagId);
+        if (tag == null) {
+            new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
+        }
         tag.setName(input.getName());
         tagRepository.save(tag);
     }

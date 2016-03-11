@@ -11,6 +11,6 @@ import java.util.Collection;
 /**
  * Created by Alexandr Korkin on 3/5/2016.
  */
-public interface NoteRepository extends JpaRepository<Note, Long> {
+public interface NoteRepository extends JpaRepository<Note, Long>, RevisionRepository<Note, Long, Integer> {
     Collection<Note> findByAccountUsername(String username);
 }

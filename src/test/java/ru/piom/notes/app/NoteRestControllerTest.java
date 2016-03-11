@@ -18,10 +18,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import ru.piom.notes.entities.Account;
 import ru.piom.notes.entities.Note;
+import ru.piom.notes.entities.NoteInput;
 import ru.piom.notes.repository.AccountRepository;
 import ru.piom.notes.repository.NoteRepository;
+import ru.piom.notes.repository.TagRepository;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.charset.Charset;
 import java.util.*;
 
@@ -59,6 +62,9 @@ public class NoteRestControllerTest {
     private NoteRepository noteRepository;
 
     @Autowired
+    private TagRepository tagRepository;
+
+    @Autowired
     private WebApplicationContext webApplicationContext;
 
     @Autowired
@@ -82,8 +88,8 @@ public class NoteRestControllerTest {
         accountRepository.deleteAllInBatch();
 
         account = accountRepository.save(new Account(userName, "password"));
-        noteList.add(noteRepository.save(new Note(account, "Note body by " + userName, "Title one")));
-        noteList.add(noteRepository.save(new Note(account, "Note body by " + userName, "Title second")));
+        noteList.add(noteRepository.save(new Note(account, "Title one", "Note body by " + userName, null)));
+        noteList.add(noteRepository.save(new Note(account, "Title second", "Note body by " + userName, null)));
     }
 
     @Test
@@ -118,22 +124,25 @@ public class NoteRestControllerTest {
     public void createNote() throws Exception {
         Map<String, String> tag = new HashMap<>();
         tag.put("name", "REST");
-        String tagLocation = this.mockMvc.perform(post("/tags").contentType(contentType).content(
-                                json(tag)))
-                .andExpect(status().isCreated()).andReturn().getResponse()
-                .getHeader("Location");
-        Note note = new Note(account, "Note", "Title");
+        this.mockMvc.perform(post("/tags").contentType(contentType).content(
+                json(tag)))
+                .andExpect(status().isCreated()).andReturn().getResponse();
+        NoteInput note = new NoteInput("Title", "Note", Arrays.asList("REST"));
         String noteJson = json(note);
-        mockMvc.perform(post("/" + userName + "/notes")
+
+        String noteLocation = mockMvc.perform(post("/" + userName + "/notes")
                 .contentType(contentType)
                 .content(noteJson))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated()).andReturn().getResponse().getHeader("Location");;
+
+
+
     }
 
     @Test
     public void updateNote() throws Exception {
         String noteJson = json(new Note(
-                account, "New Note", "New title"));
+                account, "New title", "New Note", null));
         mockMvc.perform(put("/" + userName + "/notes/" + noteList.get(0).getId())
                 .contentType(contentType)
                 .content(noteJson))
@@ -150,7 +159,7 @@ public class NoteRestControllerTest {
 
     @Test
     public void readHistory() throws Exception {
-        mockMvc.perform(get("/" + userName + "/notes/" + noteList.get(0).getId() + "/changes"))
+        mockMvc.perform(get("/" + userName + "/notes/" + noteList.get(0).getId() + "/revisions"))
                 .andExpect(status().isOk());
     }
 

@@ -13,14 +13,10 @@ import java.util.Set;
  * Created by Alexandr Korkin on 3/5/2016.
  */
 @Entity
-public class Account {
+public class Account extends AbstractEntity{
 
     @OneToMany(mappedBy = "account")
     private Set<Note> notes = new HashSet<>();
-
-    @Id
-    @GeneratedValue
-    private Long id;
 
     @JsonIgnore
     private String password;
