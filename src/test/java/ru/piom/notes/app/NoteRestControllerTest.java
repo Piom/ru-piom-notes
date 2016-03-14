@@ -2,6 +2,7 @@ package ru.piom.notes.app;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.http.MockHttpOutputMessage;
+import org.springframework.restdocs.RestDocumentation;
+import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,15 +27,18 @@ import ru.piom.notes.repository.NoteRepository;
 import ru.piom.notes.repository.TagRepository;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.charset.Charset;
 import java.util.*;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 
 
 /**
@@ -47,6 +53,9 @@ public class NoteRestControllerTest {
     private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
             MediaType.APPLICATION_JSON.getSubtype(),
             Charset.forName("utf8"));
+
+    @Rule
+    public final RestDocumentation restDocumentation = new RestDocumentation("build/generated-snippets");
 
     private MockMvc mockMvc;
 
@@ -70,6 +79,8 @@ public class NoteRestControllerTest {
     @Autowired
     private AccountRepository accountRepository;
 
+    private RestDocumentationResultHandler document;
+
     @Autowired
     void setConverters(HttpMessageConverter<?>[] converters) {
 
@@ -82,7 +93,9 @@ public class NoteRestControllerTest {
 
     @Before
     public void setup() throws Exception {
-        mockMvc = webAppContextSetup(webApplicationContext).build();
+        this.document = document("{method-name}", preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint()));
+
+        mockMvc = webAppContextSetup(webApplicationContext).alwaysDo(this.document).build();
 
         noteRepository.deleteAllInBatch();
         accountRepository.deleteAllInBatch();
@@ -102,6 +115,13 @@ public class NoteRestControllerTest {
 
     @Test
     public void readSingleNote() throws Exception {
+        this.document.snippets(
+                responseFields(
+                        fieldWithPath("[].id").description("The note ID"),
+                        fieldWithPath("[].title").description("The note title"),
+                        fieldWithPath("[].body").description("The note body")
+                )
+        );
         mockMvc.perform(get("/" + userName + "/notes/"
                 + noteList.get(0).getId()))
                 .andExpect(status().isOk())
